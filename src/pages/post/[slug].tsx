@@ -1,17 +1,16 @@
+import React from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import { format } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
 import * as prismicH from '@prismicio/helpers';
+import { RTNode } from '@prismicio/types';
+import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 
 import { getPrismicClient } from '../../services/prismic';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
-import Head from 'next/head';
-import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 import Header from '../../components/Header';
 import { formatDate } from '../';
-import React from 'react';
-import { useRouter } from 'next/router';
 
 interface Post {
   first_publication_date: string | null;
@@ -23,9 +22,7 @@ interface Post {
     author: string;
     content: {
       heading: string;
-      body: {
-        text: string;
-      }[];
+      body: [] | [RTNode, ...RTNode[]];
     }[];
   };
 }
