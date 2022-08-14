@@ -1,16 +1,17 @@
-import React from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { ReactElement, Fragment as ReactFragment } from 'react';
 import * as prismicH from '@prismicio/helpers';
 import { RTNode } from '@prismicio/types';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 
 import { getPrismicClient } from '../../services/prismic';
-import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import Header from '../../components/Header';
-import { formatDate } from '../';
+import { formatDate } from '..';
+
+type ContentBody = [] | [RTNode, ...RTNode[]];
 
 interface Post {
   first_publication_date: string | null;
@@ -22,7 +23,7 @@ interface Post {
     author: string;
     content: {
       heading: string;
-      body: [] | [RTNode, ...RTNode[]];
+      body: ContentBody;
     }[];
   };
 }
@@ -31,11 +32,14 @@ interface PostProps {
   post: Post;
 }
 
-export default function Post({ post }: PostProps) {
+export default function Post({ post }: PostProps): ReactElement {
   const router = useRouter();
 
-  if (router.isFallback)
-    return <p>Carregando...</p>
+  if (router.isFallback) return <p>Carregando...</p>;
+
+  const bodyToHTML = (body: ContentBody): { __html: string } => {
+    return { __html: prismicH.asHTML(body) };
+  };
 
   return (
     <>
@@ -72,13 +76,13 @@ export default function Post({ post }: PostProps) {
         </div>
 
         {post.data.content.map(content => (
-          <React.Fragment key={content.heading}>
+          <ReactFragment key={content.heading}>
             <h2 className={styles.heading}>{content.heading}</h2>
             <div
               className={styles.body}
-              dangerouslySetInnerHTML={{ __html: prismicH.asHTML(content.body) }}
+              dangerouslySetInnerHTML={bodyToHTML(content.body)}
             />
-          </React.Fragment>
+          </ReactFragment>
         ))}
       </main>
     </>
